@@ -14,9 +14,16 @@ async function requireAdmin() {
 
 const DEFAULT_DUES_AMOUNT = 200;
 
+/** Parse an admin-entered dues amount, falling back to the default when blank or invalid. */
+function parseDuesAmount(input: string | undefined): number {
+  const amount = Number(input);
+  return Number.isFinite(amount) && amount > 0 ? amount : DEFAULT_DUES_AMOUNT;
+}
+
 export interface AddMeetingInput {
   title: string;
   meetingDate: string;
+  duesAmount?: string;
 }
 
 export async function addMeeting(input: AddMeetingInput) {
@@ -30,7 +37,7 @@ export async function addMeeting(input: AddMeetingInput) {
     data: {
       title,
       date: new Date(input.meetingDate),
-      duesAmount: DEFAULT_DUES_AMOUNT,
+      duesAmount: parseDuesAmount(input.duesAmount),
     },
   });
 
@@ -76,6 +83,7 @@ export async function setMeetingMinutes(meetingId: string, url: string, name: st
 export interface UpdateMeetingInput {
   title: string;
   meetingDate: string;
+  duesAmount?: string;
 }
 
 export async function updateMeeting(meetingId: string, input: UpdateMeetingInput) {
@@ -85,7 +93,11 @@ export async function updateMeeting(meetingId: string, input: UpdateMeetingInput
 
   await prisma.meeting.update({
     where: { id: meetingId },
-    data: { title, date: new Date(input.meetingDate) },
+    data: {
+      title,
+      date: new Date(input.meetingDate),
+      duesAmount: parseDuesAmount(input.duesAmount),
+    },
   });
 
   revalidatePath("/meetings");

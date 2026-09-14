@@ -34,8 +34,8 @@ export function MeetingRow({
         <div>
           <div className="text-base font-semibold text-ink">{meeting.title}</div>
           <div className="mt-0.5 text-[13px] text-muted">
-            {dateLabel(meeting.date)} · {meeting.paidCount}/{meeting.memberCount} paid · ₦
-            {fmt(meeting.paidCount * meeting.duesAmount)} collected
+            {dateLabel(meeting.date)} · ₦{fmt(meeting.duesAmount)} dues · {meeting.paidCount}/
+            {meeting.memberCount} paid · ₦{fmt(meeting.paidCount * meeting.duesAmount)} collected
           </div>
         </div>
         <div className="flex items-center gap-2.5">

@@ -12,12 +12,13 @@ export function AddMeetingModal({ onClose }: { onClose: () => void }) {
   const [pending, startTransition] = useTransition();
   const [title, setTitle] = useState("");
   const [meetingDate, setMeetingDate] = useState(new Date().toISOString().slice(0, 10));
+  const [duesAmount, setDuesAmount] = useState("200");
 
   function submit() {
     if (!title.trim()) return;
     startTransition(async () => {
       try {
-        await addMeeting({ title, meetingDate });
+        await addMeeting({ title, meetingDate, duesAmount });
         toast.success(`"${title.trim()}" created`);
         router.refresh();
         onClose();
@@ -40,6 +41,12 @@ export function AddMeetingModal({ onClose }: { onClose: () => void }) {
           type="date"
           value={meetingDate}
           onChange={(e) => setMeetingDate(e.target.value)}
+        />
+        <TextInput
+          value={duesAmount}
+          onChange={(e) => setDuesAmount(e.target.value)}
+          placeholder="Dues per member (₦)"
+          inputMode="numeric"
         />
       </div>
       <ModalActions
