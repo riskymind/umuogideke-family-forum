@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+:root {
+  --color-cream: #fbf6ee;
+  --color-surface: #ffffff;
+  --color-border: #e7dcc9;
+  --color-border-light: #f0e9da;
+  --color-ink: #2b2118;
+  --color-muted: #6b5d4f;
+  --color-muted-light: #9a8b78;
+  --color-sidebar: #2b2118;
+  --color-sidebar-border: #453626;
+  --color-sidebar-muted: #c9bba5;
+  --color-sidebar-faint: #8a7a66;
+  --color-terracotta: #a6472a;
+  --color-terracotta-dark: #7c3319;
+  --color-terracotta-soft: #d98c6f;
+  --color-green: #3f6b4a;
+  --color-green-bg: #e9f1ea;
+  --color-gold: #b8862f;
+  --color-gold-bg: #fbf0dd;
+  --color-red-bg: #fbeae6;
+  --color-tan: #d9c9ac;
+  --color-chip-bg: #f3ecdd;
+}
+
+@theme inline {
+  --color-cream: var(--color-cream);
+  --color-surface: var(--color-surface);
+  --color-border: var(--color-border);
+  --color-border-light: var(--color-border-light);
+  --color-ink: var(--color-ink);
+  --color-muted: var(--color-muted);
+  --color-muted-light: var(--color-muted-light);
+  --color-sidebar: var(--color-sidebar);
+  --color-sidebar-border: var(--color-sidebar-border);
+  --color-sidebar-muted: var(--color-sidebar-muted);
+  --color-sidebar-faint: var(--color-sidebar-faint);
+  --color-terracotta: var(--color-terracotta);
+  --color-terracotta-dark: var(--color-terracotta-dark);
+  --color-terracotta-soft: var(--color-terracotta-soft);
+  --color-green: var(--color-green);
+  --color-green-bg: var(--color-green-bg);
+  --color-gold: var(--color-gold);
+  --color-gold-bg: var(--color-gold-bg);
+  --color-red-bg: var(--color-red-bg);
+  --color-tan: var(--color-tan);
+  --color-chip-bg: var(--color-chip-bg);
+  --font-serif: var(--font-newsreader), Georgia, serif;
+  --font-sans: var(--font-work-sans), Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-cream);
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-tan);
+  border-radius: 8px;
+}
+
+a {
+  color: var(--color-terracotta);
+}
+
+a:hover {
+  color: var(--color-terracotta-dark);
+}
