@@ -10,16 +10,21 @@ export default async function MeetingsPage() {
   const isAdmin = session.user.role === "admin";
   const stats = await getForumStats();
 
-  const meetings: MeetingRowData[] = stats.meetings.map((mt) => ({
-    id: mt.id,
-    title: mt.title,
-    date: mt.date,
-    duesAmount: mt.duesAmount,
-    minutesName: mt.minutesName,
-    minutesUrl: mt.minutesUrl,
-    paidCount: mt.payments.filter((p) => p.paid).length,
-    memberCount: stats.members.length,
-  }));
+  // stats.meetings is ordered oldest-first (shared with dashboard/payments,
+  // which rely on that order); sort a copy here so the latest meeting shows first.
+  const meetings: MeetingRowData[] = stats.meetings
+    .slice()
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .map((mt) => ({
+      id: mt.id,
+      title: mt.title,
+      date: mt.date,
+      duesAmount: mt.duesAmount,
+      minutesName: mt.minutesName,
+      minutesUrl: mt.minutesUrl,
+      paidCount: mt.payments.filter((p) => p.paid).length,
+      memberCount: stats.members.length,
+    }));
 
   const attendance: Record<string, AttendanceMeeting> = {};
   if (isAdmin) {
