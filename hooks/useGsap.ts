@@ -20,6 +20,10 @@ export function useGsapReveal(
 ) {
   useGSAP(
     () => callback({ reducedMotion: prefersReducedMotion() }),
-    { scope, dependencies }
+    // `useGSAP` treats a *present* `dependencies` key (even `undefined`) as
+    // "use this as the effect's dep array", which React then runs on every
+    // render. Only include the key when a dependency array was actually
+    // given, so the default stays "run once on mount".
+    dependencies ? { scope, dependencies } : { scope }
   );
 }
