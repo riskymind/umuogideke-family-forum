@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { UTApi } from "uploadthing/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -10,6 +11,30 @@ async function requireAdmin() {
     throw new Error("Not authorized");
   }
   return session;
+}
+
+const utapi = new UTApi();
+
+/** Meeting minutes are only stored as a URL, so pull the UploadThing file key back out of it. */
+function fileKeyFromUrl(url: string): string | null {
+  try {
+    const segments = new URL(url).pathname.split("/").filter(Boolean);
+    return segments.at(-1) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function deleteMinutesFile(url: string | null | undefined) {
+  if (!url) return;
+  const key = fileKeyFromUrl(url);
+  if (!key) return;
+  try {
+    await utapi.deleteFiles(key);
+  } catch (err) {
+    // Storage cleanup failing shouldn't block the DB update from succeeding.
+    console.error("Failed to delete meeting minutes file from storage", err);
+  }
 }
 
 const DEFAULT_DUES_AMOUNT = 200;
@@ -73,10 +98,40 @@ export async function toggleMeetingPayment(meetingId: string, memberId: string) 
 
 export async function setMeetingMinutes(meetingId: string, url: string, name: string) {
   await requireAdmin();
+
+  const existing = await prisma.meeting.findUnique({
+    where: { id: meetingId },
+    select: { minutesUrl: true },
+  });
+
   await prisma.meeting.update({
     where: { id: meetingId },
     data: { minutesUrl: url, minutesName: name },
   });
+
+  if (existing?.minutesUrl && existing.minutesUrl !== url) {
+    await deleteMinutesFile(existing.minutesUrl);
+  }
+
+  revalidatePath("/meetings");
+}
+
+/** Remove the uploaded minutes from a meeting without deleting the meeting itself. */
+export async function removeMeetingMinutes(meetingId: string) {
+  await requireAdmin();
+
+  const existing = await prisma.meeting.findUnique({
+    where: { id: meetingId },
+    select: { minutesUrl: true },
+  });
+
+  await prisma.meeting.update({
+    where: { id: meetingId },
+    data: { minutesUrl: null, minutesName: null },
+  });
+
+  await deleteMinutesFile(existing?.minutesUrl);
+
   revalidatePath("/meetings");
 }
 
@@ -108,7 +163,14 @@ export async function updateMeeting(meetingId: string, input: UpdateMeetingInput
 
 export async function deleteMeeting(meetingId: string) {
   await requireAdmin();
+
+  const existing = await prisma.meeting.findUnique({
+    where: { id: meetingId },
+    select: { minutesUrl: true },
+  });
+
   await prisma.meeting.delete({ where: { id: meetingId } });
+  await deleteMinutesFile(existing?.minutesUrl);
 
   revalidatePath("/meetings");
   revalidatePath("/dashboard");

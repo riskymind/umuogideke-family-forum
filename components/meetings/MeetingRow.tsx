@@ -21,13 +21,16 @@ export function MeetingRow({
   onOpenAttendance,
   onEdit,
   onDelete,
+  onRemoveMinutes,
 }: {
   meeting: MeetingRowData;
   isAdmin: boolean;
   onOpenAttendance: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onRemoveMinutes?: (id: string) => void;
 }) {
+  const hasMinutes = Boolean(meeting.minutesName);
   return (
     <Card className="p-5.5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -60,6 +63,24 @@ export function MeetingRow({
             <UploadMinutesButton meetingId={meeting.id} />
           ) : (
             <div className="text-xs text-muted-light">Minutes pending</div>
+          )}
+          {isAdmin && hasMinutes && (
+            <UploadMinutesButton
+              meetingId={meeting.id}
+              label="Replace"
+              busyLabel="Replacing…"
+              className="rounded-md bg-chip-bg px-3 py-2 text-xs font-semibold text-ink cursor-pointer disabled:opacity-60"
+            />
+          )}
+          {isAdmin && hasMinutes && onRemoveMinutes && (
+            <button
+              onClick={() => onRemoveMinutes(meeting.id)}
+              aria-label="Remove minutes"
+              className="rounded-md px-3 py-2 text-xs font-semibold cursor-pointer"
+              style={{ background: "var(--color-red-bg)", color: "var(--color-terracotta)" }}
+            >
+              Remove
+            </button>
           )}
           {isAdmin && (
             <button

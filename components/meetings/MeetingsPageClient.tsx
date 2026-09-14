@@ -6,6 +6,7 @@ import { MeetingRow, type MeetingRowData } from "@/components/meetings/MeetingRo
 import { AddMeetingModal } from "@/components/meetings/AddMeetingModal";
 import { EditMeetingModal } from "@/components/meetings/EditMeetingModal";
 import { DeleteMeetingModal } from "@/components/meetings/DeleteMeetingModal";
+import { DeleteMinutesModal } from "@/components/meetings/DeleteMinutesModal";
 import { AttendanceModal, type AttendanceMeeting } from "@/components/meetings/AttendanceModal";
 
 export function MeetingsPageClient({
@@ -21,9 +22,11 @@ export function MeetingsPageClient({
   const [attendanceId, setAttendanceId] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [removeMinutesId, setRemoveMinutesId] = useState<string | null>(null);
 
   const editMeeting = meetings.find((mt) => mt.id === editId);
   const deleteMeeting = meetings.find((mt) => mt.id === deleteId);
+  const removeMinutesMeeting = meetings.find((mt) => mt.id === removeMinutesId);
 
   return (
     <div>
@@ -51,6 +54,7 @@ export function MeetingsPageClient({
             onOpenAttendance={setAttendanceId}
             onEdit={isAdmin ? setEditId : undefined}
             onDelete={isAdmin ? setDeleteId : undefined}
+            onRemoveMinutes={isAdmin ? setRemoveMinutesId : undefined}
           />
         ))}
       </Stagger>
@@ -65,6 +69,12 @@ export function MeetingsPageClient({
       {editMeeting && <EditMeetingModal meeting={editMeeting} onClose={() => setEditId(null)} />}
       {deleteMeeting && (
         <DeleteMeetingModal meeting={deleteMeeting} onClose={() => setDeleteId(null)} />
+      )}
+      {removeMinutesMeeting && (
+        <DeleteMinutesModal
+          meeting={removeMinutesMeeting}
+          onClose={() => setRemoveMinutesId(null)}
+        />
       )}
     </div>
   );

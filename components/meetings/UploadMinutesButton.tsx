@@ -5,7 +5,17 @@ import { useRouter } from "next/navigation";
 import { useUploadThing } from "@/lib/uploadthing-client";
 import { setMeetingMinutes } from "@/actions/meetings";
 
-export function UploadMinutesButton({ meetingId }: { meetingId: string }) {
+export function UploadMinutesButton({
+  meetingId,
+  label = "Upload Minutes",
+  busyLabel = "Uploading…",
+  className,
+}: {
+  meetingId: string;
+  label?: string;
+  busyLabel?: string;
+  className?: string;
+}) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -41,10 +51,13 @@ export function UploadMinutesButton({ meetingId }: { meetingId: string }) {
       <button
         onClick={() => inputRef.current?.click()}
         disabled={busy}
-        className="rounded-md px-3.5 py-2 text-xs font-semibold text-ink cursor-pointer disabled:opacity-60"
-        style={{ background: "var(--color-chip-bg)" }}
+        className={
+          className ??
+          "rounded-md px-3.5 py-2 text-xs font-semibold text-ink cursor-pointer disabled:opacity-60"
+        }
+        style={className ? undefined : { background: "var(--color-chip-bg)" }}
       >
-        {busy ? "Uploading…" : "Upload Minutes"}
+        {busy ? busyLabel : label}
       </button>
     </>
   );
