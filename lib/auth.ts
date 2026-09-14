@@ -34,7 +34,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const password = credentials?.password;
         if (typeof username !== "string" || typeof password !== "string") return null;
 
-        const admin = await prisma.admin.findUnique({ where: { username } });
+        // Case-insensitive so "admin", "Admin" and "ADMIN" all match the
+        // seeded username.
+        const admin = await prisma.admin.findFirst({
+          where: { username: { equals: username, mode: "insensitive" } },
+        });
         if (!admin) return null;
 
         const valid = await bcrypt.compare(password, admin.passwordHash);
