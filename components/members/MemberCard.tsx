@@ -30,7 +30,7 @@ export function MemberCard({
       <Card className="p-4.5">
         <div className="mb-3 flex items-center gap-3">
           <div
-            className="flex h-[42px] w-[42px] flex-shrink-0 items-center justify-center rounded-full text-[15px] font-bold text-cream"
+            className="flex h-10.5 w-10.5 shrink-0 items-center justify-center rounded-full text-[15px] font-bold text-cream"
             style={{ background: avatarColor(member.index) }}
           >
             {initials(member.name)}

@@ -57,7 +57,7 @@ export function MemberProfileModal({
       <div className="mb-5 flex items-start justify-between gap-3.5">
         <div className="flex items-center gap-3.5">
           <div
-            className="flex h-13 w-13 flex-shrink-0 items-center justify-center rounded-full text-lg font-bold text-cream"
+            className="flex h-13 w-13 shrink-0 items-center justify-center rounded-full text-lg font-bold text-cream"
             style={{ background: avatarColor(member.index), width: 52, height: 52 }}
           >
             {initials(member.name)}
@@ -70,7 +70,7 @@ export function MemberProfileModal({
           </div>
         </div>
         {isAdmin && (onEdit || onDelete) && (
-          <div className="flex flex-shrink-0 items-center gap-1.5">
+          <div className="flex shrink-0 items-center gap-1.5">
             {onEdit && (
               <button
                 onClick={onEdit}
