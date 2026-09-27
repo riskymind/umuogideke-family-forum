@@ -1,6 +1,6 @@
 import { requireSession } from "@/lib/session";
 import { getForumStats } from "@/lib/stats";
-import { shortName } from "@/lib/dues";
+import { levyCollected, shortName } from "@/lib/dues";
 import { LeviesPageClient } from "@/components/levies/LeviesPageClient";
 import type { LevyCardData } from "@/components/levies/LevyCard";
 
@@ -10,17 +10,21 @@ export default async function LeviesPage() {
   const stats = await getForumStats();
 
   const levies: LevyCardData[] = stats.levies.map((lv) => {
-    const collected = lv.payments.filter((p) => p.paid).length * lv.amount;
     return {
       id: lv.id,
       name: lv.name,
       amount: lv.amount,
       date: lv.date,
-      collected,
+      collected: levyCollected(lv),
       target: lv.payments.length * lv.amount,
       memberRows: stats.members.map((m) => {
         const payment = m.levyPayments.find((p) => p.levyId === lv.id);
-        return { memberId: m.id, name: shortName(m.name), paid: payment?.paid ?? false };
+        return {
+          memberId: m.id,
+          name: shortName(m.name),
+          paid: payment?.paid ?? false,
+          amountPaid: payment?.amountPaid ?? null,
+        };
       }),
     };
   });

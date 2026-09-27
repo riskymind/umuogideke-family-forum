@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { shortName } from "@/lib/dues";
+import { levyCollected, shortName } from "@/lib/dues";
 
 /**
  * Central place that mirrors the design prototype's `renderVals()` money math:
@@ -33,13 +33,17 @@ export async function getForumStats() {
     0
   );
   const duesTotal = meetings.reduce((sum, mt) => sum + mt.payments.length * mt.duesAmount, 0);
-  const leviesCollected = levies.reduce(
-    (sum, lv) => sum + lv.payments.filter((p) => p.paid).length * lv.amount,
+  // Levy amounts are minimums: collected uses what was actually paid, while
+  // outstanding only counts the minimum owed by members who haven't paid, so
+  // one member's overpayment never offsets another's debt.
+  const leviesCollected = levies.reduce((sum, lv) => sum + levyCollected(lv), 0);
+  const leviesTotal = levies.reduce((sum, lv) => sum + lv.payments.length * lv.amount, 0);
+  const leviesOutstanding = levies.reduce(
+    (sum, lv) => sum + lv.payments.filter((p) => !p.paid).length * lv.amount,
     0
   );
-  const leviesTotal = levies.reduce((sum, lv) => sum + lv.payments.length * lv.amount, 0);
   const duesOutstanding = duesTotal - duesCollected;
-  const totalOutstanding = duesOutstanding + (leviesTotal - leviesCollected);
+  const totalOutstanding = duesOutstanding + leviesOutstanding;
   const complianceRate = duesTotal ? Math.round((duesCollected / duesTotal) * 100) : 100;
 
   const owedByMember = new Map<string, number>();

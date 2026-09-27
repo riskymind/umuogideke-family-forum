@@ -69,6 +69,17 @@ export function computeMemberOwed(member: OwedInput): number {
   return owed;
 }
 
+/** Total actually collected for a levy. Paid rows without a recorded amount count at the minimum. */
+export function levyCollected(levy: {
+  amount: number;
+  payments: { paid: boolean; amountPaid: number | null }[];
+}): number {
+  return levy.payments.reduce(
+    (sum, p) => (p.paid ? sum + (p.amountPaid ?? levy.amount) : sum),
+    0
+  );
+}
+
 export function paidCount(payments: PaymentLike[]): number {
   return payments.filter((p) => p.paid).length;
 }

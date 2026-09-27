@@ -68,6 +68,8 @@ model LevyPayment {
   member   Member  @relation(fields: [memberId], references: [id], onDelete: Cascade)
   memberId String
   paid     Boolean @default(false)
+  /// What the member actually paid — at least `Levy.amount`, which is only the minimum.
+  amountPaid Int?
 
   @@unique([levyId, memberId])
 }

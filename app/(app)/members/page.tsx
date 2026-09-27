@@ -48,6 +48,7 @@ export default async function MembersPage() {
           label: p.levy.name,
           paid: p.paid,
           amount: p.levy.amount,
+          amountPaid: p.amountPaid,
         })),
     };
   });

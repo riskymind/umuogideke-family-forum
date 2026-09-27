@@ -71,21 +71,40 @@ export async function deleteLevy(levyId: string) {
   revalidatePath("/reports");
 }
 
-export async function toggleLevyPayment(levyId: string, memberId: string) {
-  await requireAdmin();
-
-  const payment = await prisma.levyPayment.findUnique({
-    where: { levyId_memberId: { levyId, memberId } },
-  });
-  if (!payment) return;
-
-  await prisma.levyPayment.update({
-    where: { id: payment.id },
-    data: { paid: !payment.paid },
-  });
-
+function revalidateLevyPayment() {
   revalidatePath("/levies");
   revalidatePath("/dashboard");
   revalidatePath("/members");
   revalidatePath("/reports");
+}
+
+/** Mark a member as paid. The levy amount is a minimum — members may pay more. */
+export async function recordLevyPayment(levyId: string, memberId: string, amountInput: string) {
+  await requireAdmin();
+
+  const levy = await prisma.levy.findUnique({ where: { id: levyId } });
+  if (!levy) throw new Error("Levy not found");
+
+  const amount = Number(amountInput);
+  if (!Number.isInteger(amount) || amount < levy.amount) {
+    throw new Error(`Amount must be at least ₦${levy.amount}`);
+  }
+
+  await prisma.levyPayment.update({
+    where: { levyId_memberId: { levyId, memberId } },
+    data: { paid: true, amountPaid: amount },
+  });
+
+  revalidateLevyPayment();
+}
+
+export async function clearLevyPayment(levyId: string, memberId: string) {
+  await requireAdmin();
+
+  await prisma.levyPayment.update({
+    where: { levyId_memberId: { levyId, memberId } },
+    data: { paid: false, amountPaid: null },
+  });
+
+  revalidateLevyPayment();
 }
