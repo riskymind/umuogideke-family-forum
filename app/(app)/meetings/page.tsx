@@ -33,6 +33,7 @@ export default async function MeetingsPage() {
         id: mt.id,
         title: mt.title,
         date: mt.date,
+        duesAmount: mt.duesAmount,
         rows: stats.members.map((m) => {
           const payment = m.meetingPayments.find((p) => p.meetingId === mt.id);
           return { memberId: m.id, name: shortName(m.name), paid: payment?.paid ?? false };

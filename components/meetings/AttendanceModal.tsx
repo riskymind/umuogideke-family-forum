@@ -1,7 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useOptimistic, useTransition } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Badge, paidBadgeStyle, unpaidBadgeStyle } from "@/components/ui/Badge";
 import { dateLabel } from "@/lib/dues";
@@ -11,6 +10,7 @@ export interface AttendanceMeeting {
   id: string;
   title: string;
   date: Date;
+  duesAmount: number;
   rows: { memberId: string; name: string; paid: boolean }[];
 }
 
@@ -21,13 +21,19 @@ export function AttendanceModal({
   meeting: AttendanceMeeting;
   onClose: () => void;
 }) {
-  const router = useRouter();
   const [, startTransition] = useTransition();
+  // Flip the badge on the current frame instead of waiting for the server
+  // round-trip — on slow mobile connections the list otherwise looks frozen,
+  // which invites repeat taps that toggle the payment straight back.
+  const [rows, toggleRow] = useOptimistic(meeting.rows, (current, memberId: string) =>
+    current.map((row) => (row.memberId === memberId ? { ...row, paid: !row.paid } : row))
+  );
 
   function toggle(memberId: string) {
     startTransition(async () => {
+      toggleRow(memberId);
+      // The action's revalidatePath("/meetings") refreshes this route with fresh props.
       await toggleMeetingPayment(meeting.id, memberId);
-      router.refresh();
     });
   }
 
@@ -35,19 +41,20 @@ export function AttendanceModal({
     <Modal onClose={onClose} maxWidth={420}>
       <div className="mb-1 font-serif text-[19px] font-bold text-ink">{meeting.title}</div>
       <div className="mb-4.5 text-[13px] text-muted">
-        {dateLabel(meeting.date)} · click to toggle ₦200 dues
+        {dateLabel(meeting.date)} · tap to toggle ₦{meeting.duesAmount.toLocaleString()} dues
       </div>
-      {meeting.rows.map((row) => (
-        <div
+      {rows.map((row) => (
+        <button
+          type="button"
           key={row.memberId}
           onClick={() => toggle(row.memberId)}
-          className="flex cursor-pointer items-center justify-between border-b border-border-light py-2.5"
+          className="flex w-full cursor-pointer items-center justify-between border-b border-border-light py-2.5 text-left"
         >
           <div className="text-sm font-medium text-ink">{row.name}</div>
           <Badge style={row.paid ? paidBadgeStyle : unpaidBadgeStyle}>
             {row.paid ? "Paid" : "Unpaid"}
           </Badge>
-        </div>
+        </button>
       ))}
       <button
         onClick={onClose}
