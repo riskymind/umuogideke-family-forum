@@ -39,6 +39,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       navItems={navItems}
       currentUserName={currentUserName}
       roleLabel={isAdmin ? "Administrator" : "Member · view only"}
+      isAdmin={isAdmin}
     >
       {children}
     </Shell>

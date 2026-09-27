@@ -1,7 +1,11 @@
 "use server";
 
 import { AuthError } from "next-auth";
-import { signIn } from "@/lib/auth";
+import bcrypt from "bcryptjs";
+import { auth, signIn } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+
+const MIN_PASSWORD_LENGTH = 8;
 
 export interface LoginResult {
   error?: string;
@@ -37,4 +41,38 @@ export async function loginAsMember(memberId: string, pin: string): Promise<Logi
     }
     throw err;
   }
+}
+
+export interface ChangePasswordResult {
+  error?: string;
+}
+
+export async function changeAdminPassword(
+  currentPassword: string,
+  newPassword: string
+): Promise<ChangePasswordResult> {
+  const session = await auth();
+  if (!session || session.user.role !== "admin" || !session.user.adminId) {
+    return { error: "Not authorized." };
+  }
+
+  if (newPassword.length < MIN_PASSWORD_LENGTH) {
+    return { error: `New password must be at least ${MIN_PASSWORD_LENGTH} characters.` };
+  }
+
+  const admin = await prisma.admin.findUnique({ where: { id: session.user.adminId } });
+  if (!admin) return { error: "Admin account not found." };
+
+  const valid = await bcrypt.compare(currentPassword, admin.passwordHash);
+  if (!valid) return { error: "Current password is incorrect." };
+
+  if (await bcrypt.compare(newPassword, admin.passwordHash)) {
+    return { error: "New password must be different from the current one." };
+  }
+
+  await prisma.admin.update({
+    where: { id: admin.id },
+    data: { passwordHash: await bcrypt.hash(newPassword, 10) },
+  });
+  return {};
 }

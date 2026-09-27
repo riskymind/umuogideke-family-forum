@@ -5,6 +5,7 @@ import { signOut } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { ChangePasswordModal } from "@/components/layout/ChangePasswordModal";
 
 export interface NavItem {
   key: string;
@@ -16,14 +17,17 @@ export function Shell({
   navItems,
   currentUserName,
   roleLabel,
+  isAdmin,
   children,
 }: {
   navItems: NavItem[];
   currentUserName: string;
   roleLabel: string;
+  isAdmin: boolean;
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
   const pathname = usePathname();
 
   return (
@@ -109,6 +113,17 @@ export function Shell({
           <div className="mb-2.5 text-[11px] uppercase tracking-wide text-sidebar-faint">
             {roleLabel}
           </div>
+          {isAdmin && (
+            <button
+              onClick={() => {
+                setSidebarOpen(false);
+                setChangingPassword(true);
+              }}
+              className="mb-2 block text-sm font-medium text-sidebar-muted cursor-pointer"
+            >
+              Change password
+            </button>
+          )}
           <button
             onClick={() => signOut({ redirectTo: "/login" })}
             className="text-sm font-medium cursor-pointer"
@@ -118,6 +133,8 @@ export function Shell({
           </button>
         </div>
       </div>
+
+      {changingPassword && <ChangePasswordModal onClose={() => setChangingPassword(false)} />}
 
       <div className="min-w-0 flex-1 overflow-y-auto px-4 py-5 mt-14 md:mt-0 md:px-10 md:py-8">
         {children}

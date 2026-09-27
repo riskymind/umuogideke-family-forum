@@ -7,6 +7,7 @@ declare module "next-auth" {
   interface Session {
     user: {
       role: "admin" | "member";
+      adminId?: string;
       memberId?: string;
       name?: string | null;
     };
@@ -89,6 +90,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       const t = token as typeof token & ExtraTokenFields;
       session.user.role = t.role ?? "member";
+      // Auth.js stores the authorized user's id as `sub`; for admins that's the Admin row id.
+      session.user.adminId = t.role === "admin" ? t.sub : undefined;
       session.user.memberId = t.memberId;
       session.user.name = t.name;
       return session;
